@@ -23,6 +23,7 @@ export class CommandDispatcher {
           "  create rect <id> <x> <y> <w> <h> [fill]",
           "  tree [id]     显示文档或指定图形",
           "  move <id> <dx> <dy>  按增量移动图形",
+          "  scale <id> <factor>  等比缩放位置与尺寸",
         ].join("\n");
 
       case "init": {
@@ -113,6 +114,17 @@ export class CommandDispatcher {
         const dy = this.parseNumber(args[2]);
 
         return this.session.moveShape(args[0], dx, dy);
+      }
+
+      case "scale": {
+        this.session.getDocument();
+
+        if (args.length !== 2) {
+          throw new Error("usage: scale <id> <factor>");
+        }
+
+        const factor = this.parseNumber(args[1]);
+        return this.session.scaleShape(args[0], factor);
       }
 
       default:

@@ -4,6 +4,7 @@ import { EditCommand } from "./commands/EditCommand";
 import { ShapeFactory } from "./ShapeFactory";
 import { CreateShapeCommand } from "./commands/CreateShapeCommand";
 import { MoveCommand } from "./commands/MoveCommand";
+import { ScaleCommand } from "./commands/ScaleCommand";
 
 export class EditorSession {
   private document: SvgDocument | undefined;
@@ -67,5 +68,10 @@ export class EditorSession {
   public moveShape(id: string, dx: number, dy: number): string {
     const shape = this.getDocument().getShape(id);
     return this.executeEdit(new MoveCommand(shape, dx, dy));
+  }
+
+  public scaleShape(id: string, factor: number): string {
+    const shape = this.getDocument().getShape(id);
+    return this.executeEdit(new ScaleCommand(shape, factor));
   }
 }
