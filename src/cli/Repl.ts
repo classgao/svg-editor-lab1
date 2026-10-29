@@ -1,6 +1,9 @@
 import * as readline from "node:readline";
+import { CommandParser } from "./CommandParser";
 
 export class Repl {
+  private readonly parser = new CommandParser();
+
   public start(): void {
     const terminal = readline.createInterface({
       input: process.stdin,
@@ -12,7 +15,15 @@ export class Repl {
     terminal.prompt();
 
     terminal.on("line", (line: string) => {
-      this.handleLine(line);
+      try {
+        this.handleLine(line);
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error ? error.message : "unexpected error";
+
+        console.log(`error: ${message}`);
+      }
+
       terminal.prompt();
     });
 
@@ -22,19 +33,25 @@ export class Repl {
   }
 
   private handleLine(line: string): void {
-    const input = line.trim();
+    const tokens = this.parser.parse(line);
 
-    if (input.length === 0 || input.startsWith("#")) {
+    if (tokens.length === 0) {
       return;
     }
 
-    if (input === "help") {
+    const [command, ...args] = tokens;
+
+    if (command === "help") {
+      if (args.length !== 0) {
+        throw new Error("usage: help");
+      }
+
       console.log("当前已实现：");
       console.log("  help    显示帮助");
       console.log("  Ctrl+C  退出程序");
       return;
     }
 
-    console.log(`error: unknown command: ${input}`);
+    throw new Error(`unknown command: ${command}`);
   }
 }
