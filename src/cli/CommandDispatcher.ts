@@ -20,6 +20,8 @@ export class CommandDispatcher {
           "  undo          撤销上一次编辑",
           "  redo          重做上一次撤销的编辑",
           "  Ctrl+C        退出程序",
+          "  create rect <id> <x> <y> <w> <h> [fill]",
+          "  tree [id]     显示文档或指定图形",
         ].join("\n");
 
       case "init": {
@@ -65,6 +67,39 @@ export class CommandDispatcher {
         }
 
         return this.session.redo();
+      
+      case "create": {
+        if (args.length < 2) {
+          throw new Error("usage: create <type> <id> [params...]");
+        }
+
+        const [type, id, ...params] = args;
+        return this.session.createShape(type, id, params);
+      }
+
+      case "tree": {
+        const document = this.session.getDocument();
+
+        if (args.length > 1) {
+          throw new Error("usage: tree [id]");
+        }
+
+        if (args.length === 1) {
+          return this.session.describeShape(args[0]);
+        }
+
+        const shapes = this.session.describeShapes();
+        const lines = [
+          `svg (${document.getWidth()}x${document.getHeight()})`,
+        ];
+
+        shapes.forEach((description, index) => {
+          const branch = index === shapes.length - 1 ? "└──" : "├──";
+          lines.push(`${branch} ${description}`);
+        });
+
+        return lines.join("\n");
+      }
 
       default:
         throw new Error(`unknown command: ${command}`);

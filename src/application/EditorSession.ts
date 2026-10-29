@@ -1,10 +1,13 @@
 import { SvgDocument } from "../domain/SvgDocument";
 import { CommandHistory } from "./CommandHistory";
 import { EditCommand } from "./commands/EditCommand";
+import { ShapeFactory } from "./ShapeFactory";
+import { CreateShapeCommand } from "./commands/CreateShapeCommand";
 
 export class EditorSession {
   private document: SvgDocument | undefined;
   private readonly history = new CommandHistory();
+  private readonly shapeFactory = new ShapeFactory();
 
   public init(width: number = 800, height: number = 600): void {
     const newDocument = new SvgDocument(width, height);
@@ -39,5 +42,24 @@ export class EditorSession {
   public redo(): string {
     this.getDocument();
     return this.history.redo();
+  }
+  
+  public createShape(
+    type: string,
+    id: string,
+    params: string[]
+  ): string {
+    const document = this.getDocument();
+    const shape = this.shapeFactory.create(type, id, params);
+
+    return this.executeEdit(new CreateShapeCommand(document, shape));
+  }
+
+  public describeShapes(): readonly string[] {
+    return this.getDocument().getShapes().map((shape) => shape.describe());
+  }
+
+  public describeShape(id: string): string {
+    return this.getDocument().getShape(id).describe();
   }
 }
