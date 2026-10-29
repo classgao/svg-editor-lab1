@@ -15,4 +15,7 @@ export class EditorSession {
 
     return this.document;
   }
+  public resizeCanvas(width: number, height: number): void {
+    this.getDocument().resize(width, height);
+  }
 }

@@ -16,7 +16,7 @@ export class CommandDispatcher {
           "当前已实现：",
           "  help          显示帮助",
           "  init [w] [h]  新建画布，默认 800×600",
-          "  canvas        显示画布尺寸",
+          "  canvas [w h]  显示或修改画布尺寸",
           "  Ctrl+C        退出程序",
         ].join("\n");
 
@@ -35,11 +35,19 @@ export class CommandDispatcher {
       case "canvas": {
         const document = this.session.getDocument();
 
-        if (args.length !== 0) {
-          throw new Error("canvas resizing is not implemented yet");
+        if (args.length === 0) {
+          return `canvas ${document.getWidth()}x${document.getHeight()}`;
         }
 
-        return `canvas ${document.getWidth()}x${document.getHeight()}`;
+        if (args.length !== 2) {
+          throw new Error("usage: canvas [w h]");
+        }
+
+        const width = this.parseNumber(args[0]);
+        const height = this.parseNumber(args[1]);
+
+        this.session.resizeCanvas(width, height);
+        return `canvas resized to ${width}x${height}`;
       }
 
       default:
