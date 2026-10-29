@@ -1,1 +1,4 @@
-console.log("svg-editor 0.1 — project scaffold ready");
+import { Repl } from "./cli/Repl";
+
+const repl = new Repl();
+repl.start();

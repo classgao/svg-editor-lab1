@@ -86,10 +86,22 @@ MAIN --> INFRA
 - 解决方式：通过项目级 .npmrc 将缓存设置为 ./.npm-cache，并在 .gitignore 中忽略缓存目录。
 - 验证结果：npm install、npm run check、npm run cli 均成功，入口输出工程初始化提示。
 
+### 第二步：实现基础 REPL
+
+- 新增 src/cli/Repl.ts，封装终端输入循环；main.ts 负责启动。
+- 支持 svg> 提示符、help、忽略空行与整行注释。
+- 未知命令输出 error:，随后仍可继续输入命令。
+- 安装 @types/node，配置 Node.js 类型定义。
+- 将 module 和 moduleResolution 统一设置为 Node16，替换旧解析模式。
+- 验证结果：npm run cli 编译成功；手动测试帮助、空行、注释、
+  未知命令后继续交互及退出，均符合预期。
+- 当前限制：help 仅列出已实现功能，完整命令帮助将在后续补齐。
+
 ## 一致性自查
 
-- 当前仅实现 main 入口；其他模块仍为方案，尚未进行完成阶段的一致性检查。
-- 当前入口没有模块间依赖；后续按实际 import 关系检查依赖方向。
+- 当前已实现 main 入口与 cli/Repl，其余模块仍待实现。
+- main 依赖 cli，符合入口负责组装的规则。
+- Repl 暂时包含 help 分发逻辑，后续提取为独立命令分发模块。
 
 ## 质量保证手段
 
