@@ -17,6 +17,8 @@ export class CommandDispatcher {
           "  help          显示帮助",
           "  init [w] [h]  新建画布，默认 800×600",
           "  canvas [w h]  显示或修改画布尺寸",
+          "  undo          撤销上一次编辑",
+          "  redo          重做上一次撤销的编辑",
           "  Ctrl+C        退出程序",
         ].join("\n");
 
@@ -49,6 +51,20 @@ export class CommandDispatcher {
         this.session.resizeCanvas(width, height);
         return `canvas resized to ${width}x${height}`;
       }
+      
+      case "undo":
+        if (args.length !== 0) {
+          throw new Error("usage: undo");
+        }
+
+        return this.session.undo();
+
+      case "redo":
+        if (args.length !== 0) {
+          throw new Error("usage: redo");
+        }
+
+        return this.session.redo();
 
       default:
         throw new Error(`unknown command: ${command}`);
