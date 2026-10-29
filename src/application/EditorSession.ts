@@ -3,6 +3,7 @@ import { CommandHistory } from "./CommandHistory";
 import { EditCommand } from "./commands/EditCommand";
 import { ShapeFactory } from "./ShapeFactory";
 import { CreateShapeCommand } from "./commands/CreateShapeCommand";
+import { MoveCommand } from "./commands/MoveCommand";
 
 export class EditorSession {
   private document: SvgDocument | undefined;
@@ -43,7 +44,7 @@ export class EditorSession {
     this.getDocument();
     return this.history.redo();
   }
-  
+
   public createShape(
     type: string,
     id: string,
@@ -61,5 +62,10 @@ export class EditorSession {
 
   public describeShape(id: string): string {
     return this.getDocument().getShape(id).describe();
+  }
+
+  public moveShape(id: string, dx: number, dy: number): string {
+    const shape = this.getDocument().getShape(id);
+    return this.executeEdit(new MoveCommand(shape, dx, dy));
   }
 }

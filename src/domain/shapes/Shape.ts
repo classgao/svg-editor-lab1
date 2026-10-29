@@ -19,4 +19,6 @@ export abstract class Shape {
   public abstract scale(factor: number): void;
 
   public abstract describe(): string;
+
+  public abstract captureGeometry(): () => void;
 }

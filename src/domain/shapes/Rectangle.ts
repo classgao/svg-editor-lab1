@@ -84,4 +84,18 @@ export class Rectangle extends Shape {
   public getType(): string {
     return "rect";
   }
+
+  public captureGeometry(): () => void {
+    const x = this.x;
+    const y = this.y;
+    const width = this.width;
+    const height = this.height;
+
+    return () => {
+      this.x = x;
+      this.y = y;
+      this.width = width;
+      this.height = height;
+    };
+  }
 }

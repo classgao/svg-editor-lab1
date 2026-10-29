@@ -22,6 +22,7 @@ export class CommandDispatcher {
           "  Ctrl+C        退出程序",
           "  create rect <id> <x> <y> <w> <h> [fill]",
           "  tree [id]     显示文档或指定图形",
+          "  move <id> <dx> <dy>  按增量移动图形",
         ].join("\n");
 
       case "init": {
@@ -99,6 +100,19 @@ export class CommandDispatcher {
         });
 
         return lines.join("\n");
+      }
+
+      case "move": {
+        this.session.getDocument();
+
+        if (args.length !== 3) {
+          throw new Error("usage: move <id> <dx> <dy>");
+        }
+
+        const dx = this.parseNumber(args[1]);
+        const dy = this.parseNumber(args[2]);
+
+        return this.session.moveShape(args[0], dx, dy);
       }
 
       default:
