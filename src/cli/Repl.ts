@@ -1,8 +1,13 @@
 import * as readline from "node:readline";
 import { CommandParser } from "./CommandParser";
+import { CommandDispatcher } from "./CommandDispatcher";
 
 export class Repl {
   private readonly parser = new CommandParser();
+
+  public constructor(
+    private readonly dispatcher: CommandDispatcher
+  ) {}
 
   public start(): void {
     const terminal = readline.createInterface({
@@ -39,19 +44,6 @@ export class Repl {
       return;
     }
 
-    const [command, ...args] = tokens;
-
-    if (command === "help") {
-      if (args.length !== 0) {
-        throw new Error("usage: help");
-      }
-
-      console.log("当前已实现：");
-      console.log("  help    显示帮助");
-      console.log("  Ctrl+C  退出程序");
-      return;
-    }
-
-    throw new Error(`unknown command: ${command}`);
+    console.log(this.dispatcher.dispatch(tokens));
   }
 }

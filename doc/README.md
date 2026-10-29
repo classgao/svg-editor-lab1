@@ -108,11 +108,27 @@ MAIN --> INFRA
   help 仍能正常执行。
 - 测试过程中，PowerShell 管道传递的中文提示显示为问号；
   改用英文提示后输出正常，未修改解析器逻辑。
+
+### 第四步：画布模型与命令分发
+
+- 新增 SvgDocument，封装画布尺寸并校验有限正数。
+- 新增 EditorSession，管理当前文档；新文档校验成功后才替换旧文档。
+- 新增 CommandDispatcher，集中处理命令名分发。
+- Repl 负责输入输出和错误捕获，main 负责对象组装。
+- 实现 init、init w h 和 canvas 尺寸查询。
+- 当前约定：init 仅传宽度时，高度默认 600；未初始化时允许 help。
+- 验证结果：领域模型断言检查通过；CLI 中默认尺寸、自定义尺寸、
+  未初始化错误和非法初始化后的状态保留均符合预期。
+- 待完成：canvas 修改尺寸，以及引入历史管理后的 init 历史屏障。
+
 ## 一致性自查
 
-- 当前已实现 main 入口与 cli/Repl，其余模块仍待实现。
-- main 依赖 cli，符合入口负责组装的规则。
-- Repl 暂时包含 help 分发逻辑，后续提取为独立命令分发模块。
+- 已实现 cli、application、domain 与 main 入口，符合计划模块划分。
+- cli 通过 EditorSession 使用领域对象，没有直接导入 domain。
+- application 依赖 domain；domain 不依赖 CLI 或文件系统。
+- main 负责创建并连接各模块对象。
+- 命令名分发已集中到 CommandDispatcher，按要求列为未来重构项。
+- infrastructure、图形类和编辑命令尚未实现。
 
 ## 质量保证手段
 
