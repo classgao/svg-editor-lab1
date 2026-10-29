@@ -34,14 +34,28 @@ export class SvgDocument {
       throw new Error("canvas dimensions must be positive finite numbers");
     }
   }
-  public addShape(shape: Shape): void {
+  public addShape(shape: Shape, index: number = this.shapes.size): void {
     const id = shape.getId();
 
     if (this.shapes.has(id)) {
       throw new Error(`id already exists: ${id}`);
     }
 
-    this.shapes.set(id, shape);
+    if (!Number.isInteger(index) || index < 0 || index > this.shapes.size) {
+      throw new Error("invalid shape insertion index");
+    }
+
+    const entries = [...this.shapes.entries()];
+    entries.splice(index, 0, [id, shape]);
+    this.shapes.clear();
+    for (const [key, value] of entries) {
+      this.shapes.set(key, value);
+    }
+  }
+
+  public getShapeIndex(id: string): number {
+    this.getShape(id);
+    return [...this.shapes.keys()].indexOf(id);
   }
 
   public getShape(id: string): Shape {

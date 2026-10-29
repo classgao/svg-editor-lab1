@@ -1,6 +1,6 @@
 # Lab1 Phase 1：SVG 命令行编辑器
 
-当前状态：工程初始化。本文为持续修订的架构方案，不代表功能已完成。
+当前状态：已实现矩形创建、移动、缩放、删除、树形显示和撤销重做；其余图形、容器和文件读写仍待实现。
 
 ## 架构方案
 
@@ -47,7 +47,7 @@ MAIN --> INFRA
   src/application/commands/EditCommand.ts 定义命令契约；
   src/application/CommandHistory.ts 管理执行、撤销和重做；
   EditorSession 负责调用并在成功的文档操作后设置历史屏障。
-  具体图形编辑命令尚待实现。
+  已实现 CreateShapeCommand、MoveCommand、ScaleCommand 和 DeleteShapeCommand。
 - Memento（轻量实现）：captureGeometry 返回恢复几何状态的闭包。
   状态由图形内部封装，MoveCommand 无需读取私有字段。
 按名字分派仅允许命令分发与图形工厂两处；按实验要求列为待重构项，未来可替换为注册机制。本阶段不实现 box 或插件系统。
@@ -189,6 +189,16 @@ MAIN --> INFRA
   后续撤销仍对应上一次成功编辑。
 - 当前仅验证矩形，其他图形与容器将在实现后补测。
 
+### 第十步：删除图形并恢复原顺序
+
+- 开始由 AI 直接修改项目并运行检查，每个阶段结束后由本人手动提交。
+- 新增 DeleteShapeCommand，保存被删除的图形对象及原索引，撤销时插回原位置。
+- SvgDocument 增加索引查询和指定位置插入，重复 id 或非法索引在修改前拒绝。
+- CLI 增加 delete <id> 和帮助说明；继续复用统一的历史管理。
+- 新增 tests/delete.cjs，通过 npm run test:delete 可重复运行。
+- 类型检查及自动化测试通过，覆盖首、中、末位置删除恢复、对象身份保留、
+  重复撤销重做、失败操作保留 redo、新编辑清空 redo、IO 屏障及非法插入索引。
+- 当前仅支持根级图形；容器子树删除和父级恢复在容器阶段扩展。
 ## 一致性自查
 
 - 已实现 cli、application、domain 与 main 入口，符合计划模块划分。
@@ -196,11 +206,11 @@ MAIN --> INFRA
 - application 依赖 domain；domain 不依赖 CLI 或文件系统。
 - main 负责创建并连接各模块对象。
 - 命令名分发已集中到 CommandDispatcher，按要求列为未来重构项。
-- infrastructure、图形类和编辑命令尚未实现。
+- 已实现 Shape、Rectangle 及创建、移动、缩放、删除命令；infrastructure 和其他图形尚未实现。
 
 ## 质量保证手段
 
-- 当前阶段：TypeScript 严格类型检查、构建、入口启动检查。
+- 当前阶段：TypeScript 严格类型检查、构建、入口启动检查；npm run test:delete 执行已保存的删除回归测试。
 - 后续：图形几何操作、树结构约束、命令撤销重做、失败原子性、SVG 往返测试。
 - 最终：回放实验文档第 6.1 节版本 A，并在浏览器中检查保存的 SVG。
 - 尚未实现的功能不记作已通过。

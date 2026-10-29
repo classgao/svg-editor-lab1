@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "cli": "npm run build && node dist/main.js",
-    "check": "tsc -p tsconfig.json --noEmit"
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test:delete": "npm run build && node tests/delete.cjs"
   },
   "devDependencies": {
     "@types/node": "^16.18.126",

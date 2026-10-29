@@ -1,3 +1,4 @@
+import { DeleteShapeCommand } from "./commands/DeleteShapeCommand";
 import { SvgDocument } from "../domain/SvgDocument";
 import { CommandHistory } from "./CommandHistory";
 import { EditCommand } from "./commands/EditCommand";
@@ -63,6 +64,10 @@ export class EditorSession {
 
   public describeShape(id: string): string {
     return this.getDocument().getShape(id).describe();
+  }
+
+  public deleteShape(id: string): string {
+    return this.executeEdit(new DeleteShapeCommand(this.getDocument(), id));
   }
 
   public moveShape(id: string, dx: number, dy: number): string {
