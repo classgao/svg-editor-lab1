@@ -63,6 +63,13 @@ export class EditorSession {
     return this.getDocument().getShapes().map((shape) => shape.describe());
   }
 
+  public showShape(id: string): string {
+    const shape = this.getDocument().getShape(id);
+    // All current shapes are direct children of the SVG root.
+    const header = `${shape.getType()}#${shape.getId()}  parent=svg`;
+    return [header, ...shape.describeDetails().map(line => `  ${line}`)].join("\n");
+  }
+
   public describeShape(id: string): string {
     return this.getDocument().getShape(id).describe();
   }

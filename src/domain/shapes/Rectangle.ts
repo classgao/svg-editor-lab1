@@ -67,6 +67,10 @@ export class Rectangle extends Shape {
     return `rect#${this.getId()} ${geometry}${style}`;
   }
 
+  protected describeGeometry(): string {
+    return `x=${this.x} y=${this.y} width=${this.width} height=${this.height}`;
+  }
+
   protected setGeometryAttribute(attr: string, value: string): void {
     if (!["x", "y", "width", "height"].includes(attr)) {
       throw new Error(`unknown attribute: ${attr}`);

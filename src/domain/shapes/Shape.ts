@@ -43,6 +43,16 @@ export abstract class Shape {
     };
   }
 
+  public describeDetails(): readonly string[] {
+    const lines = [this.describeGeometry()];
+    for (const [key, value] of this.styles) {
+      lines.push(`${key}=${value}`);
+    }
+    return lines;
+  }
+
+  protected abstract describeGeometry(): string;
+
   protected describeStyles(): string {
     return [...this.styles].map(([key, value]) => ` ${key}=${value}`).join("");
   }

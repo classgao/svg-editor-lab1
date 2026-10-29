@@ -9,7 +9,8 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "test:delete": "npm run build && node tests/delete.cjs",
     "test:set": "npm run build && node tests/set.cjs",
-    "test": "npm run build && node tests/delete.cjs && node tests/set.cjs"
+    "test": "npm run build && node tests/delete.cjs && node tests/set.cjs && node tests/show.cjs",
+    "test:show": "npm run build && node tests/show.cjs"
   },
   "devDependencies": {
     "@types/node": "^16.18.126",

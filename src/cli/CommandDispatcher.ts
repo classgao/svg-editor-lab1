@@ -23,6 +23,7 @@ export class CommandDispatcher {
           "  set <id> <attr> <value>  设置属性",
           "  delete <id>   删除图形",
           "  create rect <id> <x> <y> <w> <h> [fill]",
+          "  show <id>     显示图形属性明细",
           "  tree [id]     显示文档或指定图形",
           "  move <id> <dx> <dy>  按增量移动图形",
           "  scale <id> <factor>  等比缩放位置与尺寸",
@@ -79,6 +80,14 @@ export class CommandDispatcher {
 
         const [type, id, ...params] = args;
         return this.session.createShape(type, id, params);
+      }
+
+      case "show": {
+        this.session.getDocument();
+        if (args.length !== 1) {
+          throw new Error("usage: show <id>");
+        }
+        return this.session.showShape(args[0]);
       }
 
       case "tree": {
