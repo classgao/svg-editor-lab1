@@ -1,3 +1,4 @@
+import { Text } from "../domain/shapes/Text";
 import { Circle } from "../domain/shapes/Circle";
 import { Ellipse } from "../domain/shapes/Ellipse";
 import { Line } from "../domain/shapes/Line";
@@ -61,6 +62,13 @@ export class ShapeFactory {
           this.parseNumber(params[3]),
           params[4]
         );
+      }
+
+      case "text": {
+        if (params.length !== 3) {
+          throw new Error('usage: create text <id> <x> <y> "content"');
+        }
+        return new Text(id, this.parseNumber(params[0]), this.parseNumber(params[1]), params[2]);
       }
 
       default:

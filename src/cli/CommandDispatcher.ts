@@ -25,6 +25,7 @@ export class CommandDispatcher {
           "  create circle <id> <cx> <cy> <r> [fill]",
           "  create ellipse <id> <cx> <cy> <rx> <ry> [fill]",
           "  create line <id> <x1> <y1> <x2> <y2> [stroke]",
+          '  create text <id> <x> <y> "content"',
           "  create rect <id> <x> <y> <w> <h> [fill]",
           "  show <id>     显示图形属性明细",
           "  tree [id]     显示文档或指定图形",

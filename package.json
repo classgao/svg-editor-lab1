@@ -9,9 +9,10 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "test:delete": "npm run build && node tests/delete.cjs",
     "test:set": "npm run build && node tests/set.cjs",
-    "test": "npm run build && node tests/delete.cjs && node tests/set.cjs && node tests/show.cjs && node tests/shapes.cjs",
+    "test": "npm run build && node tests/delete.cjs && node tests/set.cjs && node tests/show.cjs && node tests/shapes.cjs && node tests/text.cjs",
     "test:show": "npm run build && node tests/show.cjs",
-    "test:shapes": "npm run build && node tests/shapes.cjs"
+    "test:shapes": "npm run build && node tests/shapes.cjs",
+    "test:text": "npm run build && node tests/text.cjs"
   },
   "devDependencies": {
     "@types/node": "^16.18.126",
