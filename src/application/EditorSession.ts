@@ -51,12 +51,31 @@ export class EditorSession {
   public createShape(
     type: string,
     id: string,
-    params: string[]
+    params: string[],
+    parentId?: string
   ): string {
     const document = this.getDocument();
-    const shape = this.shapeFactory.create(type, id, params);
+    const parsed = this.shapeFactory.splitParent(type, params);
+    const shape = this.shapeFactory.create(type, id, parsed.params);
+    parentId = parentId ?? parsed.parentId;
 
-    return this.executeEdit(new CreateShapeCommand(document, shape));
+    return this.executeEdit(new CreateShapeCommand(document, shape, parentId));
+  }
+
+  public tree(id?: string): string {
+    const document = this.getDocument();
+    const root = id === undefined ? undefined : document.getShape(id);
+    const lines = [root === undefined
+      ? `svg (${document.getWidth()}x${document.getHeight()})` : root.describe()];
+    const visit = (children: readonly import("../domain/shapes/Shape").Shape[], prefix: string): void => {
+      children.forEach((child, index) => {
+        const last = index === children.length - 1;
+        lines.push(prefix + (last ? "\u2514\u2500\u2500 " : "\u251c\u2500\u2500 ") + child.describe());
+        visit(child.getChildren(), prefix + (last ? "    " : "\u2502   "));
+      });
+    };
+    visit(root === undefined ? document.getShapes() : root.getChildren(), "");
+    return lines.join("\n");
   }
 
   public describeShapes(): readonly string[] {
@@ -65,8 +84,8 @@ export class EditorSession {
 
   public showShape(id: string): string {
     const shape = this.getDocument().getShape(id);
-    // All current shapes are direct children of the SVG root.
-    const header = `${shape.getType()}#${shape.getId()}  parent=svg`;
+    const parentId = this.getDocument().getParentId(id);
+    const header = `${shape.getType()}#${shape.getId()}  parent=${parentId === undefined ? "svg" : `g#${parentId}`}`;
     return [header, ...shape.describeDetails().map(line => `  ${line}`)].join("\n");
   }
 

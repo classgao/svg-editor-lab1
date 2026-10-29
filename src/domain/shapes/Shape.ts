@@ -11,6 +11,10 @@ export abstract class Shape {
     this.id = id;
   }
 
+  public getChildren(): readonly Shape[] {
+    return [];
+  }
+
   public getId(): string {
     return this.id;
   }
@@ -44,7 +48,8 @@ export abstract class Shape {
   }
 
   public describeDetails(): readonly string[] {
-    const lines = [this.describeGeometry()];
+    const geometry = this.describeGeometry();
+    const lines = geometry === "" ? [] : [geometry];
     for (const [key, value] of this.styles) {
       lines.push(`${key}=${value}`);
     }

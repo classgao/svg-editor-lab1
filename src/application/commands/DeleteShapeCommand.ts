@@ -4,6 +4,7 @@ import { EditCommand } from "./EditCommand";
 
 export class DeleteShapeCommand implements EditCommand {
   private removed: Shape | undefined;
+  private parentId: string | undefined;
   private index: number | undefined;
 
   public constructor(
@@ -12,10 +13,12 @@ export class DeleteShapeCommand implements EditCommand {
   ) {}
 
   public execute(): string {
+    const parentId = this.document.getParentId(this.id);
     const index = this.document.getShapeIndex(this.id);
     const shape = this.document.removeShape(this.id);
     this.removed = shape;
     this.index = index;
+    this.parentId = parentId;
     return `${shape.getType()}#${this.id} deleted`;
   }
 
@@ -23,7 +26,7 @@ export class DeleteShapeCommand implements EditCommand {
     if (this.removed === undefined || this.index === undefined) {
       throw new Error("cannot undo a command that has not executed");
     }
-    this.document.addShape(this.removed, this.index);
+    this.document.addShape(this.removed, this.index, this.parentId);
     return `${this.removed.getType()}#${this.id} restored`;
   }
 }

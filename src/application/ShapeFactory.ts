@@ -1,3 +1,4 @@
+import { Group } from "../domain/shapes/Group";
 import { Text } from "../domain/shapes/Text";
 import { Circle } from "../domain/shapes/Circle";
 import { Ellipse } from "../domain/shapes/Ellipse";
@@ -6,6 +7,15 @@ import { Shape } from "../domain/shapes/Shape";
 import { Rectangle } from "../domain/shapes/Rectangle";
 
 export class ShapeFactory {
+  public splitParent(type: string, params: string[]): { params: string[]; parentId?: string } {
+    // Text content can literally be "in"; a suffix must follow all required parameters.
+    const minimum = type === "text" ? 5 : 2;
+    if (params.length >= minimum && params[params.length - 2] === "in") {
+      return { params: params.slice(0, -2), parentId: params[params.length - 1] };
+    }
+    return { params: [...params] };
+  }
+
   public create(type: string, id: string, params: string[]): Shape {
     switch (type) {
       case "rect": {
@@ -70,6 +80,10 @@ export class ShapeFactory {
         }
         return new Text(id, this.parseNumber(params[0]), this.parseNumber(params[1]), params[2]);
       }
+
+      case "g":
+        if (params.length !== 0) { throw new Error("usage: create g <id>"); }
+        return new Group(id);
 
       default:
         throw new Error(

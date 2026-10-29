@@ -26,6 +26,7 @@ export class CommandDispatcher {
           "  create ellipse <id> <cx> <cy> <rx> <ry> [fill]",
           "  create line <id> <x1> <y1> <x2> <y2> [stroke]",
           '  create text <id> <x> <y> "content"',
+          "  create g <id> ; all create commands support [in <containerId>]",
           "  create rect <id> <x> <y> <w> <h> [fill]",
           "  show <id>     显示图形属性明细",
           "  tree [id]     显示文档或指定图形",
@@ -95,27 +96,9 @@ export class CommandDispatcher {
       }
 
       case "tree": {
-        const document = this.session.getDocument();
-
-        if (args.length > 1) {
-          throw new Error("usage: tree [id]");
-        }
-
-        if (args.length === 1) {
-          return this.session.describeShape(args[0]);
-        }
-
-        const shapes = this.session.describeShapes();
-        const lines = [
-          `svg (${document.getWidth()}x${document.getHeight()})`,
-        ];
-
-        shapes.forEach((description, index) => {
-          const branch = index === shapes.length - 1 ? "└──" : "├──";
-          lines.push(`${branch} ${description}`);
-        });
-
-        return lines.join("\n");
+        this.session.getDocument();
+        if (args.length > 1) { throw new Error("usage: tree [id]"); }
+        return this.session.tree(args[0]);
       }
 
       case "set": {
