@@ -1,6 +1,6 @@
 # Lab1 Phase 1：SVG 命令行编辑器
 
-当前状态：已实现矩形创建、移动、缩放、删除、树形显示和撤销重做；其余图形、容器和文件读写仍待实现。
+当前状态：已实现矩形创建、移动、缩放、删除、属性修改、树形显示和撤销重做；其余图形、容器和文件读写仍待实现。
 
 ## 架构方案
 
@@ -47,7 +47,7 @@ MAIN --> INFRA
   src/application/commands/EditCommand.ts 定义命令契约；
   src/application/CommandHistory.ts 管理执行、撤销和重做；
   EditorSession 负责调用并在成功的文档操作后设置历史屏障。
-  已实现 CreateShapeCommand、MoveCommand、ScaleCommand 和 DeleteShapeCommand。
+  已实现 CreateShapeCommand、MoveCommand、ScaleCommand 、DeleteShapeCommand 和 SetAttributeCommand。
 - Memento（轻量实现）：captureGeometry 返回恢复几何状态的闭包。
   状态由图形内部封装，MoveCommand 无需读取私有字段。
 按名字分派仅允许命令分发与图形工厂两处；按实验要求列为待重构项，未来可替换为注册机制。本阶段不实现 box 或插件系统。
@@ -199,6 +199,17 @@ MAIN --> INFRA
 - 类型检查及自动化测试通过，覆盖首、中、末位置删除恢复、对象身份保留、
   重复撤销重做、失败操作保留 redo、新编辑清空 redo、IO 屏障及非法插入索引。
 - 当前仅支持根级图形；容器子树删除和父级恢复在容器阶段扩展。
+### 第十一步：属性设置与精确撤销
+
+- 新增 SetAttributeCommand，命令只依赖 Shape，通过多态修改属性。
+- Shape 封装公共 fill、stroke、stroke-width；Rectangle 负责 x、y、width、height。
+- 白名单外属性统一报 unknown attribute；id 不允许通过 set 修改。
+- 几何值须有限，矩形尺寸和 stroke-width 须非负；颜色值按文本保留，不做完整 CSS 语法校验。
+- captureState 同时保存几何与样式，撤销能恢复原值，也能恢复“原先没有此属性”的状态。
+- 新增 tests/set.cjs；npm test 统一执行删除及属性修改回归检查。
+- 类型检查及两组测试通过，覆盖各白名单属性、空值与非法数值、未知属性、
+  重复撤销重做、失败保留 redo、IO 屏障、带空格颜色和删除恢复后的属性撤销。
+- 其他图形及容器尚未实现；其专属属性将在对应阶段加入。
 ## 一致性自查
 
 - 已实现 cli、application、domain 与 main 入口，符合计划模块划分。
@@ -210,7 +221,7 @@ MAIN --> INFRA
 
 ## 质量保证手段
 
-- 当前阶段：TypeScript 严格类型检查、构建、入口启动检查；npm run test:delete 执行已保存的删除回归测试。
+- 当前阶段：TypeScript 严格类型检查、构建、入口启动检查；npm test 执行已保存的删除和属性修改回归测试。
 - 后续：图形几何操作、树结构约束、命令撤销重做、失败原子性、SVG 往返测试。
 - 最终：回放实验文档第 6.1 节版本 A，并在浏览器中检查保存的 SVG。
 - 尚未实现的功能不记作已通过。

@@ -5,7 +5,6 @@ export class Rectangle extends Shape {
   private y: number;
   private width: number;
   private height: number;
-  private readonly fill: string | undefined;
 
   public constructor(
     id: string,
@@ -22,7 +21,9 @@ export class Rectangle extends Shape {
     this.y = y;
     this.width = width;
     this.height = height;
-    this.fill = fill;
+    if (fill !== undefined) {
+      this.setAttribute("fill", fill);
+    }
   }
 
   public move(dx: number, dy: number): void {
@@ -61,10 +62,25 @@ export class Rectangle extends Shape {
     const geometry =
       `x=${this.x} y=${this.y} w=${this.width} h=${this.height}`;
 
-    const style =
-      this.fill === undefined ? "" : ` fill=${this.fill}`;
+    const style = this.describeStyles();
 
     return `rect#${this.getId()} ${geometry}${style}`;
+  }
+
+  protected setGeometryAttribute(attr: string, value: string): void {
+    if (!["x", "y", "width", "height"].includes(attr)) {
+      throw new Error(`unknown attribute: ${attr}`);
+    }
+    const number = this.parseNumericAttribute(value);
+    const x = attr === "x" ? number : this.x;
+    const y = attr === "y" ? number : this.y;
+    const width = attr === "width" ? number : this.width;
+    const height = attr === "height" ? number : this.height;
+    this.validateGeometry(x, y, width, height);
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
   }
 
   private validateGeometry(

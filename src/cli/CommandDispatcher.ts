@@ -20,6 +20,7 @@ export class CommandDispatcher {
           "  undo          撤销上一次编辑",
           "  redo          重做上一次撤销的编辑",
           "  Ctrl+C        退出程序",
+          "  set <id> <attr> <value>  设置属性",
           "  delete <id>   删除图形",
           "  create rect <id> <x> <y> <w> <h> [fill]",
           "  tree [id]     显示文档或指定图形",
@@ -102,6 +103,14 @@ export class CommandDispatcher {
         });
 
         return lines.join("\n");
+      }
+
+      case "set": {
+        this.session.getDocument();
+        if (args.length !== 3) {
+          throw new Error("usage: set <id> <attr> <value>");
+        }
+        return this.session.setShapeAttribute(args[0], args[1], args[2]);
       }
 
       case "delete": {

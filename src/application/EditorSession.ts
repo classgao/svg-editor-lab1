@@ -1,3 +1,4 @@
+import { SetAttributeCommand } from "./commands/SetAttributeCommand";
 import { DeleteShapeCommand } from "./commands/DeleteShapeCommand";
 import { SvgDocument } from "../domain/SvgDocument";
 import { CommandHistory } from "./CommandHistory";
@@ -64,6 +65,11 @@ export class EditorSession {
 
   public describeShape(id: string): string {
     return this.getDocument().getShape(id).describe();
+  }
+
+  public setShapeAttribute(id: string, attr: string, value: string): string {
+    const shape = this.getDocument().getShape(id);
+    return this.executeEdit(new SetAttributeCommand(shape, attr, value));
   }
 
   public deleteShape(id: string): string {
