@@ -7,6 +7,11 @@ export class Group extends Shape {
   public getType(): string { return "g"; }
   public getChildren(): readonly Shape[] { return [...this.children]; }
 
+  public captureChildren(): () => void {
+    const children = [...this.children];
+    return () => { this.children.splice(0, this.children.length, ...children); };
+  }
+
   public insertChild(shape: Shape, index: number): void {
     if (!Number.isInteger(index) || index < 0 || index > this.children.length) {
       throw new Error("invalid shape insertion index");

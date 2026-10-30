@@ -1,0 +1,47 @@
+const assert=require("node:assert/strict");
+const {EditorSession}=require("../dist/application/EditorSession.js");
+const {CommandDispatcher}=require("../dist/cli/CommandDispatcher.js");
+const {CommandParser}=require("../dist/cli/CommandParser.js");
+const s=new EditorSession(),cli=new CommandDispatcher(s),p=new CommandParser();
+const run=l=>cli.dispatch(p.parse(l));
+run("init");run("create g scene");
+for(const id of ["a","b","c"])run(`create rect ${id} 1 2 3 4 in scene`);
+const initial=run("tree");
+run("group pair c a");
+assert.deepEqual(s.getDocument().getContainer("pair").getChildren().map(x=>x.getId()),["a","c"]);
+assert.deepEqual(s.getDocument().getContainer("scene").getChildren().map(x=>x.getId()),["pair","b"]);
+const grouped=run("tree"), pair=s.getDocument().getShape("pair");
+run("move pair 10 0");const moved=run("tree");
+run("undo");run("undo");assert.equal(run("tree"),initial);
+run("redo");assert.equal(s.getDocument().getShape("pair"),pair);
+run("redo");assert.equal(run("tree"),moved);
+run("undo");
+run("ungroup pair");
+assert.deepEqual(s.getDocument().getContainer("scene").getChildren().map(x=>x.getId()),["a","c","b"]);
+run("undo");assert.equal(run("tree"),grouped);
+run("redo");run("undo");assert.equal(run("tree"),grouped);
+run("addto pair b");
+assert.deepEqual(s.getDocument().getContainer("pair").getChildren().map(x=>x.getId()),["a","c","b"]);
+const added=run("tree");run("undo");assert.equal(run("tree"),grouped);
+for(const invalid of ["group bad pair a","group bad a a","group scene a","group bad a missing",
+ "addto pair scene","addto pair pair","addto a b","addto missing b","ungroup scene","ungroup a","group x","addto pair"]){
+ assert.throws(()=>run(invalid));assert.equal(run("tree"),grouped);
+}
+run("redo");assert.equal(run("tree"),added);
+run("addto pair a");
+assert.deepEqual(s.getDocument().getContainer("pair").getChildren().map(x=>x.getId()),["c","b","a"]);
+run("undo");assert.equal(run("tree"),added);
+run("create g other in scene");run("create circle d 1 2 3 in other");
+const crossBefore=run("tree");
+run("group cross d c");
+assert.equal(s.getDocument().getParentId("cross"),"scene");
+assert.deepEqual(s.getDocument().getContainer("cross").getChildren().map(x=>x.getId()),["c","d"]);
+run("undo");assert.equal(run("tree"),crossBefore);
+run("redo");run("delete cross");run("undo");run("undo");
+assert.equal(run("tree"),crossBefore);
+run("create g empty in scene");
+const emptyBefore=run("tree");run("ungroup empty");run("undo");assert.equal(run("tree"),emptyBefore);
+run("canvas 400 300");
+assert.throws(()=>run("addto pair scene"));
+assert.throws(()=>run("undo"),/undo not allowed/);
+console.log("Hierarchy checks passed: grouping order, common parent, cycles, identity and repeated undo/redo.");

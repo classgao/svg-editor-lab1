@@ -1,3 +1,6 @@
+import { GroupCommand } from "./commands/GroupCommand";
+import { UngroupCommand } from "./commands/UngroupCommand";
+import { AddToCommand } from "./commands/AddToCommand";
 import { SetAttributeCommand } from "./commands/SetAttributeCommand";
 import { DeleteShapeCommand } from "./commands/DeleteShapeCommand";
 import { SvgDocument } from "../domain/SvgDocument";
@@ -96,6 +99,18 @@ export class EditorSession {
   public setShapeAttribute(id: string, attr: string, value: string): string {
     const shape = this.getDocument().getShape(id);
     return this.executeEdit(new SetAttributeCommand(shape, attr, value));
+  }
+
+  public groupShapes(id: string, ids: string[]): string {
+    return this.executeEdit(new GroupCommand(this.getDocument(), id, ids));
+  }
+
+  public ungroupShape(id: string): string {
+    return this.executeEdit(new UngroupCommand(this.getDocument(), id));
+  }
+
+  public addTo(gid: string, id: string): string {
+    return this.executeEdit(new AddToCommand(this.getDocument(), gid, id));
   }
 
   public deleteShape(id: string): string {

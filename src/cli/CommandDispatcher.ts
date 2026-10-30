@@ -21,6 +21,9 @@ export class CommandDispatcher {
           "  redo          重做上一次撤销的编辑",
           "  Ctrl+C        退出程序",
           "  set <id> <attr> <value>  设置属性",
+          "  group <newGid> <id1> [id2 ...]",
+          "  ungroup <gid>",
+          "  addto <gid> <id>",
           "  delete <id>   删除图形",
           "  create circle <id> <cx> <cy> <r> [fill]",
           "  create ellipse <id> <cx> <cy> <rx> <ry> [fill]",
@@ -107,6 +110,22 @@ export class CommandDispatcher {
           throw new Error("usage: set <id> <attr> <value>");
         }
         return this.session.setShapeAttribute(args[0], args[1], args[2]);
+      }
+
+      case "group": {
+        this.session.getDocument();
+        if (args.length < 2) { throw new Error("usage: group <newGid> <id1> [id2 ...]"); }
+        return this.session.groupShapes(args[0], args.slice(1));
+      }
+      case "ungroup": {
+        this.session.getDocument();
+        if (args.length !== 1) { throw new Error("usage: ungroup <gid>"); }
+        return this.session.ungroupShape(args[0]);
+      }
+      case "addto": {
+        this.session.getDocument();
+        if (args.length !== 2) { throw new Error("usage: addto <gid> <id>"); }
+        return this.session.addTo(args[0], args[1]);
       }
 
       case "delete": {
