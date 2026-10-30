@@ -1,5 +1,10 @@
 # Lab1 Phase 1：SVG 命令行编辑器
 
+- Git 仓库地址：https://github.com/classgao/svg-editor-lab1
+- 最终版本（final 标签）：https://github.com/classgao/svg-editor-lab1/tree/final
+- 已推送的最终版本提交：a745f1d
+
+
 当前状态：六种内置图形、全部命令入口、撤销重做及支持范围内的 SVG 读写已实现。2026-10-30 综合验收通过；最终提交、推送和 final 标签由本人手动完成。
 
 ## 运行与支持边界
@@ -384,7 +389,7 @@ MAIN --> INFRA
 | architecture | 文件命名、依赖方向、分发位置 |
 | Edge 视觉检查 | 生成 SVG 的实际浏览器渲染 |
 
-![流程图浏览器预览](flowchart-preview.png)
+![流程图浏览器预览](https://raw.githubusercontent.com/classgao/svg-editor-lab1/final/doc/flowchart-preview.png)
 
 ### 最终交付检查（本人执行）
 
