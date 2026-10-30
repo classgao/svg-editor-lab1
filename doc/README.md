@@ -1,6 +1,6 @@
 # Lab1 Phase 1：SVG 命令行编辑器
 
-当前状态：已实现矩形、圆形、椭圆、线段、文字及其编辑、显示和撤销重做；已实现 g 容器、in 归属和递归显示；已实现 group/ungroup/addto；已实现 front/back；文件读写仍待实现。
+当前状态：已实现矩形、圆形、椭圆、线段、文字及其编辑、显示和撤销重做；已实现 g 容器、in 归属和递归显示；已实现 group/ungroup/addto；已实现 front/back；SVG 保存已实现，读取仍待实现。
 
 ## 架构方案
 
@@ -288,6 +288,21 @@ MAIN --> INFRA
 - tests/order.cjs 覆盖根级和嵌套排序、容器及唯一子节点、连续撤销重做、
   无效参数、不存在 id、删除恢复、新编辑清空 redo 及 IO 屏障。
 - 类型检查、全部八组回归测试通过；实际 SVG 重叠渲染待文件保存阶段验证。
+### 第十八步：SVG 保存
+
+- 新增 DocumentStore 存储接口、SvgSerializer 和 FileDocumentStore。
+  main 注入实现，application 不依赖文件系统，domain 不依赖 XML 或 IO。
+- 图形通过多态提供几何/样式属性副本和文本内容，序列化器不按类型分支。
+- save 输出 SVG 命名空间、画布尺寸、viewBox、有序嵌套节点。
+  文本为子文本，转义 XML 特殊字符并拒绝非法 XML 字符；缺省样式不补写。
+- 文件先写入同目录临时文件再重命名替换，失败清理临时文件。
+  保存成功才更新当前路径并设置历史屏障；失败保留文档、路径和历史。
+- 路径约定：显式 save 成功后记住该路径，无参数 save 复用；init 清除路径。
+- 元素计数包含 g 和所有后代，不含 svg 根；示例流程图为 8 个元素（3 个 g、2 个 rect、2 个 text、1 个 line）。此前将其计为 9 是分析错误，现按实际结构纠正。
+- tests/save.cjs 验证六类节点、特殊字符、路径空格、重复覆盖、
+  缺失目录失败、原文件保护、排序及历史屏障；全部九组测试通过。
+- 已通过真实 CLI 生成 examples/flowchart.svg，可用浏览器直接打开。
+  本阶段未进行浏览器视觉验收，最终综合阶段补充；read 尚未实现。
 ## 一致性自查
 
 - 已实现 cli、application、domain 与 main 入口，符合计划模块划分。
@@ -295,7 +310,7 @@ MAIN --> INFRA
 - application 依赖 domain；domain 不依赖 CLI 或文件系统。
 - main 负责创建并连接各模块对象。
 - 命令名分发已集中到 CommandDispatcher，按要求列为未来重构项。
-- 已实现 Shape、Rectangle、Circle、Ellipse、Line、Text 及创建、移动、缩放、删除、属性修改命令；已实现 Group 容器；分组与同级排序已实现，infrastructure 尚未实现。
+- 已实现 Shape、Rectangle、Circle、Ellipse、Line、Text 及创建、移动、缩放、删除、属性修改命令；已实现 Group 容器；分组与同级排序已实现，infrastructure 已实现 SVG 保存，读取待实现。
 
 ## 质量保证手段
 

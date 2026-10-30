@@ -16,6 +16,10 @@ export class Circle extends Shape {
     }
   }
 
+  protected geometryAttributes(): Record<string, string> {
+    return { cx: String(this.cx), cy: String(this.cy), r: String(this.r) };
+  }
+
   public getType(): string {
     return "circle";
   }

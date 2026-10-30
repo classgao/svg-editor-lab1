@@ -18,6 +18,10 @@ export class Ellipse extends Shape {
     }
   }
 
+  protected geometryAttributes(): Record<string, string> {
+    return { cx: String(this.cx), cy: String(this.cy), rx: String(this.rx), ry: String(this.ry) };
+  }
+
   public getType(): string {
     return "ellipse";
   }

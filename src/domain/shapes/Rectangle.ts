@@ -101,6 +101,10 @@ export class Rectangle extends Shape {
       throw new Error("rectangle dimensions must be non-negative");
     }
   }
+  protected geometryAttributes(): Record<string, string> {
+    return { x: String(this.x), y: String(this.y), width: String(this.width), height: String(this.height) };
+  }
+
   public getType(): string {
     return "rect";
   }

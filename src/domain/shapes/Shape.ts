@@ -11,6 +11,14 @@ export abstract class Shape {
     this.id = id;
   }
 
+  public getAttributes(): Readonly<Record<string, string>> {
+    return { id: this.id, ...this.geometryAttributes(), ...Object.fromEntries(this.styles) };
+  }
+
+  public getTextContent(): string | undefined { return undefined; }
+
+  protected abstract geometryAttributes(): Record<string, string>;
+
   public getChildren(): readonly Shape[] {
     return [];
   }

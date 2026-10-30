@@ -14,6 +14,7 @@ export class CommandDispatcher {
 
         return [
           "当前已实现：",
+          "  save [file.svg]  保存 SVG 文件",
           "  help          显示帮助",
           "  init [w] [h]  新建画布，默认 800×600",
           "  canvas [w h]  显示或修改画布尺寸",
@@ -37,6 +38,12 @@ export class CommandDispatcher {
           "  move <id> <dx> <dy>  按增量移动图形",
           "  scale <id> <factor>  等比缩放位置与尺寸",
         ].join("\n");
+
+      case "save": {
+        this.session.getDocument();
+        if (args.length > 1) { throw new Error("usage: save [file.svg]"); }
+        return this.session.save(args[0]);
+      }
 
       case "init": {
         if (args.length > 2) {

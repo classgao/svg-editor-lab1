@@ -18,6 +18,10 @@ export class Line extends Shape {
     }
   }
 
+  protected geometryAttributes(): Record<string, string> {
+    return { x1: String(this.x1), y1: String(this.y1), x2: String(this.x2), y2: String(this.y2) };
+  }
+
   public getType(): string {
     return "line";
   }

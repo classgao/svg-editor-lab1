@@ -13,6 +13,12 @@ export class Text extends Shape {
     this.content = content;
   }
 
+  protected geometryAttributes(): Record<string, string> {
+    return { x: String(this.x), y: String(this.y) };
+  }
+
+  public getTextContent(): string { return this.content; }
+
   public getType(): string {
     return "text";
   }

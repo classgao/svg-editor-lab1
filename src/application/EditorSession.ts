@@ -1,3 +1,4 @@
+import { DocumentStore } from "./ports/DocumentStore";
 import { ReorderCommand } from "./commands/ReorderCommand";
 import { GroupCommand } from "./commands/GroupCommand";
 import { UngroupCommand } from "./commands/UngroupCommand";
@@ -13,6 +14,9 @@ import { MoveCommand } from "./commands/MoveCommand";
 import { ScaleCommand } from "./commands/ScaleCommand";
 
 export class EditorSession {
+  private currentPath: string | undefined;
+  public constructor(private readonly store?: DocumentStore) {}
+
   private document: SvgDocument | undefined;
   private readonly history = new CommandHistory();
   private readonly shapeFactory = new ShapeFactory();
@@ -21,7 +25,24 @@ export class EditorSession {
     const newDocument = new SvgDocument(width, height);
 
     this.document = newDocument;
+    this.currentPath = undefined;
     this.history.blockAfterIo();
+  }
+
+  public save(path?: string): string {
+    const document = this.getDocument();
+    const target = path ?? this.currentPath;
+    if (target === undefined || target.trim() === "") {
+      throw new Error("no file path. use 'save <file.svg>'");
+    }
+    if (this.store === undefined) { throw new Error("document storage is not configured"); }
+    try { this.store.save(document, target); }
+    catch { throw new Error(`cannot write file: ${target}`); }
+    this.currentPath = target;
+    this.history.blockAfterIo();
+    const count = (shapes: readonly import("../domain/shapes/Shape").Shape[]): number =>
+      shapes.reduce((total, shape) => total + 1 + count(shape.getChildren()), 0);
+    return `saved to ${target} (${count(document.getShapes())} elements)`;
   }
 
   public getDocument(): SvgDocument {

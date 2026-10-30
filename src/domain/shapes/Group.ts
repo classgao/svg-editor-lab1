@@ -4,6 +4,10 @@ export class Group extends Shape {
   private readonly children: Shape[] = [];
 
   public constructor(id: string) { super(id); }
+  protected geometryAttributes(): Record<string, string> {
+    return {  };
+  }
+
   public getType(): string { return "g"; }
   public getChildren(): readonly Shape[] { return [...this.children]; }
 
