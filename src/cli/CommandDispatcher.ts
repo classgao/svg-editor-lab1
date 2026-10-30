@@ -96,6 +96,7 @@ export class CommandDispatcher {
         return this.session.redo();
       
       case "create": {
+        this.session.getDocument();
         if (args.length < 2) {
           throw new Error("usage: create <type> <id> [params...]");
         }

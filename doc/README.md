@@ -1,6 +1,31 @@
 # Lab1 Phase 1：SVG 命令行编辑器
 
-当前状态：已实现矩形、圆形、椭圆、线段、文字及其编辑、显示和撤销重做；已实现 g 容器、in 归属和递归显示；已实现 group/ungroup/addto；已实现 front/back；SVG 保存及读取已实现，待最终综合验收。
+当前状态：六种内置图形、全部命令入口、撤销重做及支持范围内的 SVG 读写已实现。2026-10-30 综合验收通过；最终提交、推送和 final 标签由本人手动完成。
+
+## 运行与支持边界
+
+在项目根目录运行 npm ci 安装固定依赖，npm run check 检查类型，
+npm test 执行全部测试，npm run cli 启动编辑器。出现 svg> 后输入 help；
+Ctrl+C 退出。examples/flowchart.svg 可拖入浏览器查看。
+
+开发环境：Node.js 16.19.1、npm 8.19.3；.npmrc 使用项目相对缓存路径。
+
+- 六类：rect、circle、ellipse、line、text、g；box 属后续阶段，不实现。
+- 几何值须有限，尺寸与半径非负，画布宽高为正。init 单参数只指定宽度；
+  canvas 修改时必须同时提供宽高。未初始化时允许 help。
+- 成功 IO/画布修改清除旧历史并禁止 undo/redo，下一次成功编辑解除屏障；
+  查询或失败命令不改变历史。成功的无效果排序仍是一个编辑单元。
+- 显式 save 成功更新默认路径，read 成功使用读取路径，init 清除路径。
+- 前景在同级数组末尾；跨父级 group 放到最近公共容器，按原树前序收编，
+  插入最早涉及的直接分支之前；原空容器保留；根级 g 不允许 ungroup。
+- g 样式按 SVG 继承，改变归属可能改变继承外观，不复制或换算样式。
+- 外部 SVG 只接受六类及白名单属性、纯数值尺寸、匹配尺寸的 viewBox、
+  文本实体/CDATA，普通 g 的 data-kind 降级。拒绝 transform、未知标签/属性、
+  不匹配 viewBox、DOCTYPE 和外部命名空间，避免静默丢失含义。
+- 实验背景的 transform 示例不能直接导入；如课程验收要求支持该类文件，
+  需要另行扩展，不将当前结果宣称为完整 SVG 标准兼容。
+- CLI 支持双引号包裹空格及空文本，未实现引号内反斜杠转义；
+  颜色字符串保留，不实施完整 CSS 校验。
 
 ## 架构方案
 
@@ -12,12 +37,12 @@
 | src/application | 编辑器会话、命令执行、撤销重做历史 |
 | src/application/commands | 各编辑命令类；一条编辑命令为一个撤销单元 |
 | src/application/ports | 文档存取接口 |
-| src/domain | 文档、唯一 id 索引、父子关系和树结构约束 |
+| src/domain | 文档、全局 id 查找、父子关系和树结构约束 |
 | src/domain/shapes | 图形抽象、五种叶子图形与 Group |
 | src/infrastructure | SVG XML 解析、序列化和文件读写 |
 | src/main.ts | 程序入口和依赖组装 |
 
-计划目录随实现创建，避免把空目录当成已实现模块。
+上述目录均已实现；tests 保存可重复运行的回归与验收测试。
 
 ```plantuml
 @startuml
@@ -31,6 +56,7 @@ component "main" as MAIN
 CLI --> APP
 APP --> DOMAIN
 INFRA ..> STORE : implements
+INFRA --> APP : reuse ShapeFactory
 INFRA --> DOMAIN
 MAIN --> CLI
 MAIN --> APP
@@ -47,7 +73,7 @@ MAIN --> INFRA
   src/application/commands/EditCommand.ts 定义命令契约；
   src/application/CommandHistory.ts 管理执行、撤销和重做；
   EditorSession 负责调用并在成功的文档操作后设置历史屏障。
-  已实现 CreateShapeCommand、MoveCommand、ScaleCommand 、DeleteShapeCommand 和 SetAttributeCommand。
+  已实现创建、移动、缩放、删除、属性设置、分组、解组、移动归属和排序命令。
 - Memento（轻量实现）：captureGeometry 返回恢复几何状态的闭包。
   状态由图形内部封装，MoveCommand 无需读取私有字段。
 按名字分派仅允许命令分发与图形工厂两处；按实验要求列为待重构项，未来可替换为注册机制。本阶段不实现 box 或插件系统。
@@ -57,7 +83,7 @@ MAIN --> INFRA
 - cli 可以依赖 application；不直接操作文件系统或修改图形字段。
 - application 可以依赖 domain；通过 ports 使用文档存取能力，不依赖 infrastructure。
 - domain 不依赖 application、cli 或 infrastructure，不执行终端和文件 IO。
-- infrastructure 可以依赖 application/ports 与 domain，实现外部存取。
+- infrastructure 可以依赖 application/ports、domain 及 application/ShapeFactory；导入复用唯一工厂，避免第三处类型分派。此特例已纳入自动检查。
 - main 负责组装，可以依赖各模块。
 
 以上规则将领域行为与输入输出隔离，便于测试和替换交互方式。
@@ -69,22 +95,17 @@ MAIN --> INFRA
 3. 文件存储方式可能变化：通过 DocumentStore 接口隔离。
 4. 撤销实现可能优化：由命令保存恢复所需的状态；先保证精确恢复，不提前做压缩或持久化历史。
 
-### 待确认语义
-
-- 跨父级 group 的新组父级、插入位置及排序规则。
-- 外部 SVG 的 transform 和未知标签支持范围。
-- 显式 save 后，默认保存路径是否更新。
-- 未初始化时 help 是否可用。
-- 示例保存节点计数与实际结构不一致，需明确计数口径。
+### 语义决策
+采用上方支持边界中的约定；这些是实现决策，并非老师另行确认。
 
 ### 方案修订记录
 
 - 2026-10-29：建立初版架构和工程骨架。
 - ShapeFactory 实际放在 application 层，负责将命令参数转换为领域对象。
-- 当前使用 Map 保存根级图形及顺序；引入容器时将拆分为全文档 id 索引
-  和各容器的有序子节点。
+- 初版使用 Map；容器阶段改为有序根节点和子节点，递归全局查找 id，未增加独立索引。
 
 ## 过程记录
+以下保留各阶段历史，“待完成”针对当时阶段；最终状态以上方清单为准。
 
 ### 第一步：环境检查与工程初始化
 
@@ -320,18 +341,54 @@ MAIN --> INFRA
 - tests/read.cjs 验证六类往返、自动补号避让、重复 id、非法 XML、
   文本实体/CDATA、失败保留历史、读取路径默认保存；全部十组测试通过。
 - 读取成功摘要包含元素数量；最终综合验收仍待单独进行。
+### 第二十步：综合验收
+
+- 将 .npmrc 的本机绝对缓存路径改为相对路径，便于他人克隆运行。
+- 修复空参数 create 在未初始化时优先报 usage 的问题，统一为 no document。
+- 新增 acceptance，通过真实 Node 子进程回放第 6.1 节版本 A，
+  验证中文文本、容器移动撤销、保存再读入及 IO 历史屏障。
+- 新增 architecture：检查 29 个 TS 文件的一类一文件命名、依赖方向，
+  以及 switch 仅位于命令分发和图形工厂。
+- npm run check 与 npm test 全部通过，共 12 个可重复执行的测试脚本。
+- 使用本地 Edge 无头模式渲染 examples/flowchart.svg 并查看截图，
+  两个彩色矩形、各自文本及中间连线清晰可见，无明显裁切。
+- 截图只验证此示例外观，结构、历史和转义通过自动测试验证。
+- 更新过时架构描述，明确导入复用工厂的依赖特例和 SVG 支持范围。
+
 ## 一致性自查
 
-- 已实现 cli、application、domain 与 main 入口，符合计划模块划分。
-- cli 通过 EditorSession 使用领域对象，没有直接导入 domain。
-- application 依赖 domain；domain 不依赖 CLI 或文件系统。
-- main 负责创建并连接各模块对象。
-- 命令名分发已集中到 CommandDispatcher，按要求列为未来重构项。
-- 已实现 Shape、Rectangle、Circle、Ellipse、Line、Text 及创建、移动、缩放、删除、属性修改命令；已实现 Group 容器；分组与同级排序已实现，infrastructure 已实现 SVG 保存，读取待实现。
+1. 模块划分：cli、application、commands、ports、domain、shapes、
+   infrastructure 和 main 均已实现。工厂位于 application，id 使用递归查找，
+   与初版差异已记录在修订及过程记录中。
+2. 依赖方向：自动扫描相对导入与外部依赖，domain 无 IO/上层依赖，
+   application 不依赖 cli/infrastructure，cli 不直接导入 domain/infrastructure。
+   infrastructure 允许 ports/domain 和唯一 ShapeFactory，规则与代码一致。
+3. 模式：编辑命令实现 EditCommand；Group 递归委托 Shape；
+   几何、属性和层级快照负责精确撤销；工厂集中创建具体图形。
+4. 显示和序列化通过多态取值，没有散落的 switch(tag)。
+   命令分发及图形工厂按要求保留为后续注册机制重构点。
+5. 历史快照与递归查找存在 O(n) 成本，适用于实验规模；
+   未进行大规模文档性能验收，不将测试通过等同于无缺陷。
 
 ## 质量保证手段
 
-- 当前阶段：TypeScript 严格类型检查、构建、入口启动检查；npm test 执行已保存的删除、属性修改和属性查询回归测试。
-- 后续：图形几何操作、树结构约束、命令撤销重做、失败原子性、SVG 往返测试。
-- 最终：回放实验文档第 6.1 节版本 A，并在浏览器中检查保存的 SVG。
-- 尚未实现的功能不记作已通过。
+| 验证 | 覆盖内容 |
+| --- | --- |
+| npm run check | 严格类型检查 |
+| npm test | 构建并执行全部 12 组检查 |
+| delete / set / show | 顺序恢复、属性白名单、查询历史不变 |
+| shapes / text / groups | 六类图形、精确恢复、整组失败回滚 |
+| hierarchy / order | 分组、归属、循环防护、对象身份与排序 |
+| save / read | 实际文件、转义、失败保护、补 id、往返与路径 |
+| acceptance | 真实 REPL、中文流程图、未初始化规则、保存读回 |
+| architecture | 文件命名、依赖方向、分发位置 |
+| Edge 视觉检查 | 生成 SVG 的实际浏览器渲染 |
+
+![流程图浏览器预览](flowchart-preview.png)
+
+### 最终交付检查（本人执行）
+
+- 确认声明的外部 SVG 支持范围符合课程验收要求。
+- 提交本阶段并推送，确认工作区干净、远程同步。
+- 在最终提交上创建 final 标签并在截止时间前推送标签。
+- 截止日期以课程通知为准；若 final 已存在，先检查而非覆盖。
