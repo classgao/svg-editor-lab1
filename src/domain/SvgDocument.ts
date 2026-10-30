@@ -162,6 +162,15 @@ export class SvgDocument {
     });
   }
 
+  public reorderShape(id: string, toFront: boolean): void {
+    const shape = this.getShape(id);
+    const parentId = this.getParentId(id);
+    this.changeHierarchy(() => {
+      this.removeShape(id);
+      this.addShape(shape, toFront ? undefined : 0, parentId);
+    });
+  }
+
   private changeHierarchy(operation: () => void): void {
     const restore = this.captureHierarchy();
     try { operation(); }

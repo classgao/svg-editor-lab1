@@ -21,6 +21,7 @@ export class CommandDispatcher {
           "  redo          重做上一次撤销的编辑",
           "  Ctrl+C        退出程序",
           "  set <id> <attr> <value>  设置属性",
+          "  front <id> / back <id>  调整同级图层顺序",
           "  group <newGid> <id1> [id2 ...]",
           "  ungroup <gid>",
           "  addto <gid> <id>",
@@ -110,6 +111,13 @@ export class CommandDispatcher {
           throw new Error("usage: set <id> <attr> <value>");
         }
         return this.session.setShapeAttribute(args[0], args[1], args[2]);
+      }
+
+      case "front":
+      case "back": {
+        this.session.getDocument();
+        if (args.length !== 1) { throw new Error(`usage: ${command} <id>`); }
+        return this.session.reorderShape(args[0], command === "front");
       }
 
       case "group": {

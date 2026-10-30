@@ -9,12 +9,13 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "test:delete": "npm run build && node tests/delete.cjs",
     "test:set": "npm run build && node tests/set.cjs",
-    "test": "npm run build && node tests/delete.cjs && node tests/set.cjs && node tests/show.cjs && node tests/shapes.cjs && node tests/text.cjs && node tests/groups.cjs && node tests/hierarchy.cjs",
+    "test": "npm run build && node tests/delete.cjs && node tests/set.cjs && node tests/show.cjs && node tests/shapes.cjs && node tests/text.cjs && node tests/groups.cjs && node tests/hierarchy.cjs && node tests/order.cjs",
     "test:show": "npm run build && node tests/show.cjs",
     "test:shapes": "npm run build && node tests/shapes.cjs",
     "test:text": "npm run build && node tests/text.cjs",
     "test:groups": "npm run build && node tests/groups.cjs",
-    "test:hierarchy": "npm run build && node tests/hierarchy.cjs"
+    "test:hierarchy": "npm run build && node tests/hierarchy.cjs",
+    "test:order": "npm run build && node tests/order.cjs"
   },
   "devDependencies": {
     "@types/node": "^16.18.126",

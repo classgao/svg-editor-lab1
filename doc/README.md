@@ -1,6 +1,6 @@
 # Lab1 Phase 1：SVG 命令行编辑器
 
-当前状态：已实现矩形、圆形、椭圆、线段、文字及其编辑、显示和撤销重做；已实现 g 容器、in 归属和递归显示；已实现 group/ungroup/addto；前后排序与文件读写仍待实现。
+当前状态：已实现矩形、圆形、椭圆、线段、文字及其编辑、显示和撤销重做；已实现 g 容器、in 归属和递归显示；已实现 group/ungroup/addto；已实现 front/back；文件读写仍待实现。
 
 ## 架构方案
 
@@ -278,6 +278,16 @@ MAIN --> INFRA
 - tests/hierarchy.cjs 覆盖同级与跨级分组、对象身份、删除与解组组合、
   空容器、顺序恢复、循环拒绝和失败保留历史；全部七组测试通过。
 - 本阶段不实现 box；front/back 留到下一次独立提交。
+### 第十七步：同级图层顺序
+
+- 新增 ReorderCommand，front 将图形移到同级数组末尾，back 移到开头。
+  SVG 后绘制的元素覆盖先绘制的元素，因此数组末尾对应视觉最上层。
+- 调整仅影响同级顺序，保持原父级、几何、样式、对象身份及容器子树不变。
+- 撤销通过层级快照恢复原顺序；失败操作不改变图形或历史。
+- 已在目标位置的 front/back 仍视为成功编辑，按一条命令一个历史单元处理。
+- tests/order.cjs 覆盖根级和嵌套排序、容器及唯一子节点、连续撤销重做、
+  无效参数、不存在 id、删除恢复、新编辑清空 redo 及 IO 屏障。
+- 类型检查、全部八组回归测试通过；实际 SVG 重叠渲染待文件保存阶段验证。
 ## 一致性自查
 
 - 已实现 cli、application、domain 与 main 入口，符合计划模块划分。
@@ -285,7 +295,7 @@ MAIN --> INFRA
 - application 依赖 domain；domain 不依赖 CLI 或文件系统。
 - main 负责创建并连接各模块对象。
 - 命令名分发已集中到 CommandDispatcher，按要求列为未来重构项。
-- 已实现 Shape、Rectangle、Circle、Ellipse、Line、Text 及创建、移动、缩放、删除、属性修改命令；已实现 Group 容器；infrastructure 和分组重排尚未实现。
+- 已实现 Shape、Rectangle、Circle、Ellipse、Line、Text 及创建、移动、缩放、删除、属性修改命令；已实现 Group 容器；分组与同级排序已实现，infrastructure 尚未实现。
 
 ## 质量保证手段
 

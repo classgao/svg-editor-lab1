@@ -1,3 +1,4 @@
+import { ReorderCommand } from "./commands/ReorderCommand";
 import { GroupCommand } from "./commands/GroupCommand";
 import { UngroupCommand } from "./commands/UngroupCommand";
 import { AddToCommand } from "./commands/AddToCommand";
@@ -99,6 +100,10 @@ export class EditorSession {
   public setShapeAttribute(id: string, attr: string, value: string): string {
     const shape = this.getDocument().getShape(id);
     return this.executeEdit(new SetAttributeCommand(shape, attr, value));
+  }
+
+  public reorderShape(id: string, toFront: boolean): string {
+    return this.executeEdit(new ReorderCommand(this.getDocument(), id, toFront));
   }
 
   public groupShapes(id: string, ids: string[]): string {
