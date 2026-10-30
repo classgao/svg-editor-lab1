@@ -14,6 +14,7 @@ export class CommandDispatcher {
 
         return [
           "当前已实现：",
+          "  read <file.svg>  读取 SVG 文件",
           "  save [file.svg]  保存 SVG 文件",
           "  help          显示帮助",
           "  init [w] [h]  新建画布，默认 800×600",
@@ -38,6 +39,11 @@ export class CommandDispatcher {
           "  move <id> <dx> <dy>  按增量移动图形",
           "  scale <id> <factor>  等比缩放位置与尺寸",
         ].join("\n");
+
+      case "read": {
+        if (args.length !== 1) { throw new Error("usage: read <file.svg>"); }
+        return this.session.read(args[0]);
+      }
 
       case "save": {
         this.session.getDocument();

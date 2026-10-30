@@ -9,17 +9,21 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "test:delete": "npm run build && node tests/delete.cjs",
     "test:set": "npm run build && node tests/set.cjs",
-    "test": "npm run build && node tests/delete.cjs && node tests/set.cjs && node tests/show.cjs && node tests/shapes.cjs && node tests/text.cjs && node tests/groups.cjs && node tests/hierarchy.cjs && node tests/order.cjs && node tests/save.cjs",
+    "test": "npm run build && node tests/delete.cjs && node tests/set.cjs && node tests/show.cjs && node tests/shapes.cjs && node tests/text.cjs && node tests/groups.cjs && node tests/hierarchy.cjs && node tests/order.cjs && node tests/save.cjs && node tests/read.cjs",
     "test:show": "npm run build && node tests/show.cjs",
     "test:shapes": "npm run build && node tests/shapes.cjs",
     "test:text": "npm run build && node tests/text.cjs",
     "test:groups": "npm run build && node tests/groups.cjs",
     "test:hierarchy": "npm run build && node tests/hierarchy.cjs",
     "test:order": "npm run build && node tests/order.cjs",
-    "test:save": "npm run build && node tests/save.cjs"
+    "test:save": "npm run build && node tests/save.cjs",
+    "test:read": "npm run build && node tests/read.cjs"
   },
   "devDependencies": {
     "@types/node": "^16.18.126",
     "typescript": "5.7.3"
+  },
+  "dependencies": {
+    "@xmldom/xmldom": "0.9.12"
   }
 }

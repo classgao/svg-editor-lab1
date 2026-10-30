@@ -29,6 +29,16 @@ export class EditorSession {
     this.history.blockAfterIo();
   }
 
+  public read(path: string): string {
+    if (this.store === undefined) { throw new Error("document storage is not configured"); }
+    const result = this.store.read(path);
+    this.document = result.document;
+    this.currentPath = path;
+    this.history.blockAfterIo();
+    const count = (nodes: readonly import("../domain/shapes/Shape").Shape[]): number => nodes.reduce((sum, node) => sum + 1 + count(node.getChildren()), 0);
+    return [...result.warnings, `read ${path} (${count(result.document.getShapes())} elements)`].join("\n");
+  }
+
   public save(path?: string): string {
     const document = this.getDocument();
     const target = path ?? this.currentPath;
